@@ -10,6 +10,8 @@ public class MainFrame extends JFrame {
     private static final int WIDTH = 950;
     private static final int HEIGHT = 650;
 
+    private final Field field = new Field();
+
     public MainFrame () {
 
         super("Программирование и синхронизация потоков");
@@ -36,12 +38,13 @@ public class MainFrame extends JFrame {
 
         addBall.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-
+                field.addBall();
             }
         });
 
         pauseMovement.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                field.pause();
                 continueMovement.setEnabled(true);
                 pauseMovement.setEnabled(false);
             }
@@ -49,6 +52,7 @@ public class MainFrame extends JFrame {
 
         continueMovement.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                field.resume();
                 pauseMovement.setEnabled(true);
                 continueMovement.setEnabled(false);
             }
@@ -71,6 +75,8 @@ public class MainFrame extends JFrame {
 
             }
         });
+
+        getContentPane().add(field, BorderLayout.CENTER);
 
     }
 
