@@ -5,14 +5,14 @@ import java.awt.geom.Ellipse2D;
 
 import static java.lang.Math.*;
 
-public class BouncingBall implements Runnable  {
+public class BouncingBall extends Thread  {
 
     private static final int MAX_RADIUS = 40;
     private static final int MIN_RADIUS = 3;
     private static final int MAX_SPEED = 15;
 
     private final Field field;
-    private final int radius;
+    public final int radius;
     private final Color color;
 
     private int speed;
@@ -21,6 +21,8 @@ public class BouncingBall implements Runnable  {
 
     private double x;
     private double y;
+
+   private int number = 0;
 
     public BouncingBall (Field field) {
         this.field = field;
@@ -72,5 +74,21 @@ public class BouncingBall implements Runnable  {
         Ellipse2D.Double ball = new Ellipse2D.Double(x-radius,y-radius, 2*radius, 2*radius);
         canvas.draw(ball);
         canvas.fill(ball);
+    }
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public void setNumber(int number) {
+        this.number = number;
+    }
+
+    public int getNumber() {
+        return number;
     }
 }

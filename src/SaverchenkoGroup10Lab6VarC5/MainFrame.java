@@ -10,7 +10,9 @@ public class MainFrame extends JFrame {
     private static final int WIDTH = 950;
     private static final int HEIGHT = 650;
 
-    private final Field field = new Field();
+    private static final Field field = new Field();
+
+    private final Cursor d;
 
     public MainFrame () {
 
@@ -35,6 +37,10 @@ public class MainFrame extends JFrame {
         JMenuItem addConstructor = furniture.add(new JMenuItem("Конструктор"));
         JMenuItem addDestructor = furniture.add(new JMenuItem("Деструктор"));
         JMenuItem addTeleport = furniture.add(new JMenuItem("Телепорт"));
+
+
+        Image cursorD = kit.getImage("src/destructorCursor.PNG");
+        d = kit.createCustomCursor(cursorD , new Point(5, 5), "cursor");
 
         addBall.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -66,7 +72,8 @@ public class MainFrame extends JFrame {
 
         addDestructor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-
+                field.setDestructorIA(true);
+                field.setCursor (d);
             }
         });
 
@@ -84,5 +91,9 @@ public class MainFrame extends JFrame {
         MainFrame frame = new MainFrame();
         frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
         frame.setVisible(true);
+        while (frame.isVisible()) {
+            if (field.getDefaultCursorTrigger())
+            frame.setCursor(Cursor.getDefaultCursor());
+        }
     }
 }
