@@ -17,10 +17,10 @@ public class MainFrame extends JFrame {
     Cursor tpCursor1;
     Cursor tpCursor2;
 
-    public MainFrame () {
+    public MainFrame() {
 
         super("Программирование и синхронизация потоков");
-        setSize(WIDTH,HEIGHT);
+        setSize(WIDTH, HEIGHT);
         Toolkit kit = Toolkit.getDefaultToolkit();
         setLocation((kit.getScreenSize().width - WIDTH) / 2, (kit.getScreenSize().height - HEIGHT) / 2);
         Image img = kit.getImage("src/icon.png");
@@ -28,7 +28,7 @@ public class MainFrame extends JFrame {
 
         JMenuBar menuBar = new JMenuBar();
         setJMenuBar(menuBar);
-        JMenu functionalMenu  = menuBar.add(new JMenu("Добавить"));
+        JMenu functionalMenu = menuBar.add(new JMenu("Добавить"));
         JMenuItem addBall = functionalMenu.add(new JMenuItem("Мяч"));
         JMenu furniture = new JMenu("Оборудование");
         functionalMenu.add(furniture);
@@ -43,9 +43,9 @@ public class MainFrame extends JFrame {
 
 
         Image cursorD = kit.getImage("src/destructorCursor.PNG");
-        destructorCursor = kit.createCustomCursor(cursorD , new Point(0, 0), "cursor");
+        destructorCursor = kit.createCustomCursor(cursorD, new Point(0, 0), "cursor");
         Image cursorC = kit.getImage("src/constructorCursor.PNG");
-        constructorCursor = kit.createCustomCursor(cursorC , new Point(0, 0), "cursor");
+        constructorCursor = kit.createCustomCursor(cursorC, new Point(0, 0), "cursor");
 
         addBall.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -73,19 +73,21 @@ public class MainFrame extends JFrame {
             }
         });
 
-        continueMovement.setAccelerator(KeyStroke.getKeyStroke("C"));
+        continueMovement.setAccelerator(KeyStroke.getKeyStroke("R"));
 
         addConstructor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                field.setConstructorIA(true);
+                field.setSelected(Field.Selected.CIA);
                 field.setCursor(constructorCursor);
             }
         });
 
+        addConstructor.setAccelerator(KeyStroke.getKeyStroke("C"));
+
         addDestructor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                field.setDestructorIA(true);
-                field.setCursor (destructorCursor);
+                field.setSelected(Field.Selected.DIA);
+                field.setCursor(destructorCursor);
             }
         });
 
@@ -102,11 +104,7 @@ public class MainFrame extends JFrame {
         this.setVisible(true);
     }
 
-    public static void main (String[] args) {
+    public static void main(String[] args) {
         MainFrame frame = new MainFrame();
-        while (frame.isVisible()) {
-            if (field.getDefaultCursorTrigger())
-            frame.setCursor(Cursor.getDefaultCursor());
-        }
     }
 }

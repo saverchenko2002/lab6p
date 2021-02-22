@@ -26,9 +26,20 @@ public class Obj {
     }
 
     public void paint(Graphics2D canvas) {
+        GeneralPath marker = new GeneralPath();
         switch (this.getType()) {
+
+            case CONSTRUCTOR : {
+                canvas.setColor(Color.black);
+                marker.moveTo(getX(), getY());
+                marker.lineTo(getX() + size, getY());
+                marker.lineTo(marker.getCurrentPoint().getX(), getY()+size);
+                marker.lineTo(marker.getCurrentPoint().getX() - size, marker.getCurrentPoint().getY());
+                marker.lineTo(marker.getCurrentPoint().getX(), marker.getCurrentPoint().getY()-size);
+                break;
+            }
+
             case DESTRUCTOR : {
-                GeneralPath marker = new GeneralPath();
                 canvas.setColor(Color.red);
                 marker.moveTo(getX(), getY());
                 marker.lineTo(getX() + size, getY() + size);
@@ -36,16 +47,15 @@ public class Obj {
                 marker.lineTo(marker.getCurrentPoint().getX() + size / 2, marker.getCurrentPoint().getY() - size / 2);
                 marker.lineTo(marker.getCurrentPoint().getX() - size, marker.getCurrentPoint().getY() + size);
                 canvas.setColor(Color.red);
-                canvas.draw(marker);
+                break;
 
             }
-            case CONSTRUCTOR : {
-                break;
-            }
+
             case PORTAL : {
                 break;
             }
         }
+        canvas.draw(marker);
     }
 
     public Type getType() {

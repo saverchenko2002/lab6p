@@ -76,6 +76,21 @@ public class BouncingBall extends Thread  {
         canvas.fill(ball);
     }
 
+    public boolean intersect(Obj obj) {
+        switch (obj.getType()) {
+            case DESTRUCTOR: {
+                return ((getX() - radius >= obj.getX() && getX() + radius <= obj.getX()+obj.getSize())
+                        && (getY() + radius <= obj.getY()+obj.getSize() && getY() - radius > obj.getY()));
+            }
+            case CONSTRUCTOR: {
+
+            }
+            default:
+                return false;
+
+        }
+    }
+
     public double getX() {
         return x;
     }

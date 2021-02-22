@@ -11,28 +11,29 @@ import java.util.LinkedList;
 
 public class Field extends JPanel {
 
-    /*public enum Selected {
+    public enum Selected {
         NONE,
         DIA,
         CIA,
         TP1IA,
         TP2IA
-    }*/
+    }
+
+    private Selected selected;
 
     private boolean paused;
-    private boolean destructorIA = false;
-    private boolean constructorIA = false;
     private final LinkedList<BouncingBall> balls = new LinkedList<>();
 
     private final Font hintFont;
+    private final float hintMove = 50;
     public int hintX;
     public int hintY;
-    boolean defaultCursorTrigger = false;
 
     ArrayList<Obj> obj = new ArrayList<>();
 
 
     public Field() {
+        selected = Selected.NONE;
         setBackground(Color.WHITE);
         Timer repaintTimer = new Timer(1, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -56,19 +57,26 @@ public class Field extends JPanel {
             ball.paint(canvas);
         }
         canvas.setFont(hintFont);
-        FontRenderContext context = canvas.getFontRenderContext();
-        Rectangle2D bounds = hintFont.getStringBounds("hot-dog", context);
 
-        if (destructorIA) {
-            canvas.setColor(Color.magenta);
-            canvas.drawString("press LMB to install destructor", hintX, (float) (hintY + bounds.getWidth()));
-        }
+        switch (selected) {
+            case DIA: {
+                canvas.setColor(Color.blue);
+                canvas.drawString("press LMB to install destructor", hintX, (float) (hintY+hintMove));
+                break;
+            }
+            case CIA: {
+                canvas.setColor(Color.blue);
+                canvas.drawString("press LMB to install constructor", hintX, (float) (hintY+hintMove));
+                }
+            case TP1IA: {
 
-        else if (constructorIA) {
+                }
+            case TP2IA : {
 
-        }
-        else {
+            }
+            case NONE: {
 
+            }
         }
 
         if (obj.size()!=0) {
@@ -82,12 +90,11 @@ public class Field extends JPanel {
 
         }
     }
-
+//TODO
     public void fu () {
         for (BouncingBall ball : balls) {
             for (Obj obj1 : obj) {
-                if ((ball.getX() - ball.radius >= obj1.getX() && ball.getX() + ball.radius <= obj1.getX()+obj1.getSize())
-                        && (ball.getY() + ball.radius <= obj1.getY()+obj1.getSize() && ball.getY() - ball.radius > obj1.getY())) {
+                if (ball.intersect(obj1)) {
                     int saveIndex = ball.getNumber();
                     for (int i = ball.getNumber()+1;i<balls.size();i++)
                         balls.get(i).setNumber(i-1);
@@ -117,21 +124,25 @@ public class Field extends JPanel {
             wait();
     }
 
-    //TODO сделать обобщенную функцию для офа
     public class MouseHandler extends MouseAdapter {
         public void mousePressed(MouseEvent e) {
             if (e.getButton() == 1) {
-                if (destructorIA) {
-                    obj.add(new Obj(Obj.Type.DESTRUCTOR,e.getX(),e.getY()));
-                    setDestructorIA(false);
+
+                switch (selected) {
+                    case DIA: obj.add(new Obj(Obj.Type.DESTRUCTOR, e.getX(),e.getY())); break;
+                    case CIA: obj.add(new Obj(Obj.Type.CONSTRUCTOR,e.getX(),e.getY())); break;
+                    case TP1IA: {
+
+                    }
+                    case TP2IA: {
+
+                    }
+                    case NONE: {
+
+                    }
                 }
-                if (constructorIA) {
-                    obj.add(new Obj(Obj.Type.CONSTRUCTOR,e.getX(),e.getY()));
-                    setConstructorIA(false);
-                }
-                defaultCursorTrigger = true;
+                selected = Selected.NONE;
                 setCursor(Cursor.getDefaultCursor());
-                defaultCursorTrigger = false;
             }
         }
     }
@@ -145,26 +156,18 @@ public class Field extends JPanel {
 
         @Override
         public void mouseMoved(MouseEvent e) {
-            if (destructorIA) {
+            if (selected!=Selected.NONE) {
                 hintX=e.getX();
                 hintY=e.getY();
             }
         }
     }
 
-    public void setDestructorIA (boolean value) {
-        destructorIA=value;
+    public Selected getSelected () {
+        return selected;
     }
 
-    public void setConstructorIA (boolean value) {
-        constructorIA = value;
-    }
-
-    public boolean getDestructorIA () {
-        return destructorIA;
-    }
-
-    public boolean getDefaultCursorTrigger () {
-        return defaultCursorTrigger;
+    public void setSelected (Selected selected) {
+        this.selected=selected;
     }
 }
