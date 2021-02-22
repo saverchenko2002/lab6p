@@ -3,8 +3,6 @@ package SaverchenkoGroup10Lab6VarC5;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.font.FontRenderContext;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -67,6 +65,7 @@ public class Field extends JPanel {
             case CIA: {
                 canvas.setColor(Color.blue);
                 canvas.drawString("press LMB to install constructor", hintX, (float) (hintY+hintMove));
+                break;
                 }
             case TP1IA: {
 
@@ -95,17 +94,33 @@ public class Field extends JPanel {
         for (BouncingBall ball : balls) {
             for (Obj obj1 : obj) {
                 if (ball.intersect(obj1)) {
-                    int saveIndex = ball.getNumber();
-                    for (int i = ball.getNumber()+1;i<balls.size();i++)
-                        balls.get(i).setNumber(i-1);
-                    balls.remove(saveIndex);
-                    return;
+                    switch (obj1.getType()) {
+                        case DESTRUCTOR: {
+                                int saveIndex = ball.getNumber();
+                                for (int i = ball.getNumber() + 1; i < balls.size(); i++)
+                                    balls.get(i).setNumber(i - 1);
+                                balls.remove(saveIndex);
+                                return;
+                        }
+                        case CONSTRUCTOR: {
+
+                            BouncingBall ballCopy = new BouncingBall(this, ball);
+                            addBall(ballCopy);
+                            return;
+                        }
+                    }
                 }
             }
         }
     }
+
     public void addBall() {
         BouncingBall ball = new BouncingBall(this);
+        ball.setNumber(balls.size());
+        balls.add(ball);
+    }
+
+    public void addBall(BouncingBall ball) {
         ball.setNumber(balls.size());
         balls.add(ball);
     }
@@ -170,4 +185,5 @@ public class Field extends JPanel {
     public void setSelected (Selected selected) {
         this.selected=selected;
     }
+
 }

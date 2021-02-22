@@ -11,9 +11,9 @@ public class BouncingBall extends Thread  {
     private static final int MIN_RADIUS = 3;
     private static final int MAX_SPEED = 15;
 
-    private final Field field;
+    private Field field;
     public final int radius;
-    private final Color color;
+    private  Color color;
 
     private int speed;
     private double speedX;
@@ -21,6 +21,8 @@ public class BouncingBall extends Thread  {
 
     private double x;
     private double y;
+
+    private boolean visibleTrigger = false;
 
    private int number = 0;
 
@@ -36,6 +38,19 @@ public class BouncingBall extends Thread  {
         color = new Color((float)random(),(float)random(),(float)random());
         x = random()*(field.getSize().getWidth()-2*radius) + radius;
         y = random()*(field.getSize().getHeight()-2*radius) + radius;
+        Thread thisThread = new Thread(this);
+        thisThread.start();
+    }
+
+    public BouncingBall (Field field, BouncingBall ball) {
+        this.field=field;
+        color = ball.getColor();
+        radius = ball.getRadius();
+        x=ball.getX();
+        y=ball.getY();
+        double angle = random()*2*PI;
+        speedX=3*cos(angle);
+        speedY=3*cos(angle);
         Thread thisThread = new Thread(this);
         thisThread.start();
     }
@@ -64,7 +79,6 @@ public class BouncingBall extends Thread  {
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
-
         }
     }
 
@@ -78,16 +92,15 @@ public class BouncingBall extends Thread  {
 
     public boolean intersect(Obj obj) {
         switch (obj.getType()) {
-            case DESTRUCTOR: {
+            case DESTRUCTOR: return ((getX() - radius >= obj.getX() && getX() + radius <= obj.getX()+obj.getSize())
+                    && (getY() + radius <= obj.getY()+obj.getSize() && getY() - radius > obj.getY()));
+            case CONSTRUCTOR: {
+
                 return ((getX() - radius >= obj.getX() && getX() + radius <= obj.getX()+obj.getSize())
                         && (getY() + radius <= obj.getY()+obj.getSize() && getY() - radius > obj.getY()));
             }
-            case CONSTRUCTOR: {
-
-            }
             default:
                 return false;
-
         }
     }
 
@@ -106,4 +119,34 @@ public class BouncingBall extends Thread  {
     public int getNumber() {
         return number;
     }
+
+    public int getRadius() {
+        return radius;
+    }
+
+    public Color getColor() {
+        return color;
+    }
+
+    public void setSpeedX(double speedX) {
+        this.speedX = speedX;
+    }
+
+    public void setSpeedY(double speedY) {
+        this.speedY = speedY;
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
+    }
+
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    public void setY(double y) {
+        this.y = y;
+    }
+
+
 }
