@@ -4,15 +4,24 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.font.FontRenderContext;
-import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+
 public class Field extends JPanel {
+
+    /*public enum Selected {
+        NONE,
+        DIA,
+        CIA,
+        TP1IA,
+        TP2IA
+    }*/
 
     private boolean paused;
     private boolean destructorIA = false;
+    private boolean constructorIA = false;
     private final LinkedList<BouncingBall> balls = new LinkedList<>();
 
     private final Font hintFont;
@@ -42,47 +51,52 @@ public class Field extends JPanel {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D canvas = (Graphics2D) g;
+        canvas.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         for (BouncingBall ball : balls) {
             ball.paint(canvas);
         }
         canvas.setFont(hintFont);
         FontRenderContext context = canvas.getFontRenderContext();
         Rectangle2D bounds = hintFont.getStringBounds("hot-dog", context);
+
         if (destructorIA) {
             canvas.setColor(Color.magenta);
             canvas.drawString("press LMB to install destructor", hintX, (float) (hintY + bounds.getWidth()));
         }
+
+        else if (constructorIA) {
+
+        }
+        else {
+
+        }
+
         if (obj.size()!=0) {
             for (Obj obj1 : obj) {
-                GeneralPath marker = new GeneralPath();
-                canvas.setColor(Color.red);
-                marker.moveTo(obj1.getX(),obj1.getY());
-                marker.lineTo(obj1.getX()+50,obj1.getY()+50);
-                marker.moveTo(marker.getCurrentPoint().getX()-25,marker.getCurrentPoint().getY()-25);
-                marker.lineTo(marker.getCurrentPoint().getX()+25,marker.getCurrentPoint().getY()-25);
-                marker.lineTo(marker.getCurrentPoint().getX()-50,marker.getCurrentPoint().getY()+50);
-                canvas.setColor(Color.red);
-                canvas.draw(marker);
+                obj1.paint(canvas);
             }
         }
-        if (balls.size()!=0 && obj.size()!=0) {
-            for (BouncingBall ball : balls) {
-                for (Obj obj1 : obj) {
 
-                    //if ((ball.getX() - ball.radius > obj1.getX()-25 && ball.getX() + ball.radius < obj1.getX()+25)
-                       // && (ball.getY() + ball.radius < obj1.getY()+25 && ball.getY() - ball.radius > obj1.getY()-25))
-                    if (ball.getX()>obj1.getX() && ball.getY()>obj1.getY())
-                    {
-                        int saveIndex = ball.getNumber();
-                        for (int i = ball.getNumber()+1;i<balls.size();i++)
-                            balls.get(i).setNumber(i-1);
-                        balls.remove(saveIndex);
-                    }
+        if (balls.size()!=0 && obj.size()!=0) {
+            fu();
+
+        }
+    }
+
+    public void fu () {
+        for (BouncingBall ball : balls) {
+            for (Obj obj1 : obj) {
+                if ((ball.getX() - ball.radius >= obj1.getX() && ball.getX() + ball.radius <= obj1.getX()+obj1.getSize())
+                        && (ball.getY() + ball.radius <= obj1.getY()+obj1.getSize() && ball.getY() - ball.radius > obj1.getY())) {
+                    int saveIndex = ball.getNumber();
+                    for (int i = ball.getNumber()+1;i<balls.size();i++)
+                        balls.get(i).setNumber(i-1);
+                    balls.remove(saveIndex);
+                    return;
                 }
             }
         }
     }
-
     public void addBall() {
         BouncingBall ball = new BouncingBall(this);
         ball.setNumber(balls.size());
@@ -108,8 +122,12 @@ public class Field extends JPanel {
         public void mousePressed(MouseEvent e) {
             if (e.getButton() == 1) {
                 if (destructorIA) {
-                    obj.add(new Obj("d",e.getX(),e.getY()));
+                    obj.add(new Obj(Obj.Type.DESTRUCTOR,e.getX(),e.getY()));
                     setDestructorIA(false);
+                }
+                if (constructorIA) {
+                    obj.add(new Obj(Obj.Type.CONSTRUCTOR,e.getX(),e.getY()));
+                    setConstructorIA(false);
                 }
                 defaultCursorTrigger = true;
                 setCursor(Cursor.getDefaultCursor());
@@ -136,6 +154,10 @@ public class Field extends JPanel {
 
     public void setDestructorIA (boolean value) {
         destructorIA=value;
+    }
+
+    public void setConstructorIA (boolean value) {
+        constructorIA = value;
     }
 
     public boolean getDestructorIA () {

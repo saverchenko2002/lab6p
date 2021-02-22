@@ -12,7 +12,10 @@ public class MainFrame extends JFrame {
 
     private static final Field field = new Field();
 
-    private final Cursor d;
+    Cursor destructorCursor;
+    Cursor constructorCursor;
+    Cursor tpCursor1;
+    Cursor tpCursor2;
 
     public MainFrame () {
 
@@ -40,13 +43,17 @@ public class MainFrame extends JFrame {
 
 
         Image cursorD = kit.getImage("src/destructorCursor.PNG");
-        d = kit.createCustomCursor(cursorD , new Point(5, 5), "cursor");
+        destructorCursor = kit.createCustomCursor(cursorD , new Point(0, 0), "cursor");
+        Image cursorC = kit.getImage("src/constructorCursor.PNG");
+        constructorCursor = kit.createCustomCursor(cursorC , new Point(0, 0), "cursor");
 
         addBall.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 field.addBall();
             }
         });
+
+        addBall.setAccelerator(KeyStroke.getKeyStroke("A"));
 
         pauseMovement.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -56,6 +63,8 @@ public class MainFrame extends JFrame {
             }
         });
 
+        pauseMovement.setAccelerator(KeyStroke.getKeyStroke("P"));
+
         continueMovement.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 field.resume();
@@ -64,19 +73,23 @@ public class MainFrame extends JFrame {
             }
         });
 
+        continueMovement.setAccelerator(KeyStroke.getKeyStroke("C"));
+
         addConstructor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-
+                field.setConstructorIA(true);
+                field.setCursor(constructorCursor);
             }
         });
 
         addDestructor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 field.setDestructorIA(true);
-                field.setCursor (d);
+                field.setCursor (destructorCursor);
             }
         });
 
+        addDestructor.setAccelerator(KeyStroke.getKeyStroke("D"));
         addTeleport.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
 
@@ -85,12 +98,12 @@ public class MainFrame extends JFrame {
 
         getContentPane().add(field, BorderLayout.CENTER);
 
+        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.setVisible(true);
     }
 
     public static void main (String[] args) {
         MainFrame frame = new MainFrame();
-        frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
-        frame.setVisible(true);
         while (frame.isVisible()) {
             if (field.getDefaultCursorTrigger())
             frame.setCursor(Cursor.getDefaultCursor());
