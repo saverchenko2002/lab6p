@@ -7,11 +7,18 @@ import static java.lang.Math.*;
 
 public class BouncingBall extends Thread  {
 
+    public enum Cloned {
+        AVAILABLE,
+        UNAVAILABLE
+    }
+
+    Cloned cloned;
+
     private static final int MAX_RADIUS = 40;
     private static final int MIN_RADIUS = 3;
     private static final int MAX_SPEED = 15;
 
-    private Field field;
+    private final Field field;
     public final int radius;
     private  Color color;
 
@@ -21,18 +28,16 @@ public class BouncingBall extends Thread  {
 
     private double x;
     private double y;
-
-    private boolean visibleTrigger = false;
-
-   private int number = 0;
+    private int number = 0;
 
     public BouncingBall (Field field) {
+        cloned = Cloned.AVAILABLE;
         this.field = field;
+        double angle = random()*2*PI;
         radius = (int) (MIN_RADIUS+random()*(MAX_RADIUS-2));
         speed = 5*MAX_SPEED / radius;
         if (speed>MAX_SPEED)
             speed=MAX_SPEED;
-        double angle = random()*2*PI;
         speedX=3*cos(angle);
         speedY=3*cos(angle);
         color = new Color((float)random(),(float)random(),(float)random());
@@ -43,8 +48,9 @@ public class BouncingBall extends Thread  {
     }
 
     public BouncingBall (Field field, BouncingBall ball) {
+        cloned = Cloned.UNAVAILABLE;
         this.field=field;
-        color = ball.getColor();
+        color = new Color((float)random(),(float)random(),(float)random());
         radius = ball.getRadius();
         x=ball.getX();
         y=ball.getY();
@@ -58,6 +64,13 @@ public class BouncingBall extends Thread  {
     public void run () {
         while (true) {
             try {
+                /*if (cloned == Cloned.UNAVAILABLE) {
+                    for (Obj obj2 : field.getObj() ) {
+                        System.out.println(obj2.getType());
+                        if(obj2.getType()==Obj.Type.CONSTRUCTOR && !intersect(obj2))
+                            cloned=Cloned.AVAILABLE;
+                    }
+                }*/
                 field.canMove(this);
                 if (x + speedX <= radius) {
                     speedX = -speedX;

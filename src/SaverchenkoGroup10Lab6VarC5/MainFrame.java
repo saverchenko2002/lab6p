@@ -14,12 +14,12 @@ public class MainFrame extends JFrame {
 
     Cursor destructorCursor;
     Cursor constructorCursor;
-    Cursor tpCursor1;
-    Cursor tpCursor2;
+    Cursor tpInCursor;
+    Cursor tpOutCursor;
 
     public MainFrame() {
 
-        super("Программирование и синхронизация потоков");
+        super("Balls");
         setSize(WIDTH, HEIGHT);
         Toolkit kit = Toolkit.getDefaultToolkit();
         setLocation((kit.getScreenSize().width - WIDTH) / 2, (kit.getScreenSize().height - HEIGHT) / 2);
@@ -28,24 +28,26 @@ public class MainFrame extends JFrame {
 
         JMenuBar menuBar = new JMenuBar();
         setJMenuBar(menuBar);
-        JMenu functionalMenu = menuBar.add(new JMenu("Добавить"));
-        JMenuItem addBall = functionalMenu.add(new JMenuItem("Мяч"));
-        JMenu furniture = new JMenu("Оборудование");
+        JMenu functionalMenu = menuBar.add(new JMenu("Add"));
+        JMenuItem addBall = functionalMenu.add(new JMenuItem("Ball"));
+        JMenu furniture = new JMenu("Tools");
         functionalMenu.add(furniture);
-        JMenu control = menuBar.add(new JMenu("Управление"));
-        JMenuItem pauseMovement = control.add(new JMenuItem("Пауза"));
-        JMenuItem continueMovement = control.add(new JMenuItem("Продолжить"));
+        JMenu control = menuBar.add(new JMenu("Control"));
+        JMenuItem pauseMovement = control.add(new JMenuItem("Pause"));
+        JMenuItem continueMovement = control.add(new JMenuItem("Resume"));
         continueMovement.setEnabled(false);
 
-        JMenuItem addConstructor = furniture.add(new JMenuItem("Конструктор"));
-        JMenuItem addDestructor = furniture.add(new JMenuItem("Деструктор"));
-        JMenuItem addTeleport = furniture.add(new JMenuItem("Телепорт"));
+        JMenuItem addConstructor = furniture.add(new JMenuItem("Constructor"));
+        JMenuItem addDestructor = furniture.add(new JMenuItem("Destructor"));
+        JMenuItem addTeleport = furniture.add(new JMenuItem("Teleport"));
 
 
         Image cursorD = kit.getImage("src/destructorCursor.PNG");
         destructorCursor = kit.createCustomCursor(cursorD, new Point(0, 0), "cursor");
         Image cursorC = kit.getImage("src/constructorCursor.PNG");
         constructorCursor = kit.createCustomCursor(cursorC, new Point(0, 0), "cursor");
+        Image cursorTpIn = kit.getImage("src/tpInCursor.png");
+        tpInCursor = kit.createCustomCursor(cursorTpIn, new Point(0,0), "cursor");
 
         addBall.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -94,9 +96,12 @@ public class MainFrame extends JFrame {
         addDestructor.setAccelerator(KeyStroke.getKeyStroke("D"));
         addTeleport.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-
+                field.setSelected(Field.Selected.TP1IA);
+                field.setCursor(tpInCursor);
             }
         });
+
+        addTeleport.setAccelerator(KeyStroke.getKeyStroke("T"));
 
         getContentPane().add(field, BorderLayout.CENTER);
 

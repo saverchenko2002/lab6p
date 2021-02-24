@@ -13,7 +13,8 @@ public class Obj {
     public enum Type {
         DESTRUCTOR,
         CONSTRUCTOR,
-        PORTAL
+        PORTAL_IN,
+        PORTAL_OUT
     }
 
     private final Type type;
@@ -29,7 +30,7 @@ public class Obj {
         GeneralPath marker = new GeneralPath();
         switch (this.getType()) {
 
-            case CONSTRUCTOR : {
+            case CONSTRUCTOR :
                 canvas.setColor(Color.black);
                 marker.moveTo(getX(), getY());
                 marker.lineTo(getX() + size, getY());
@@ -37,9 +38,8 @@ public class Obj {
                 marker.lineTo(marker.getCurrentPoint().getX() - size, marker.getCurrentPoint().getY());
                 marker.lineTo(marker.getCurrentPoint().getX(), marker.getCurrentPoint().getY()-size);
                 break;
-            }
 
-            case DESTRUCTOR : {
+            case DESTRUCTOR :
                 canvas.setColor(Color.red);
                 marker.moveTo(getX(), getY());
                 marker.lineTo(getX() + size, getY() + size);
@@ -49,11 +49,25 @@ public class Obj {
                 canvas.setColor(Color.red);
                 break;
 
-            }
+            case PORTAL_IN :
 
-            case PORTAL : {
+                canvas.setColor(Color.ORANGE);
+                marker.moveTo(getX(), getY());
+                marker.lineTo(getX() + size/3, getY());
+                marker.lineTo(marker.getCurrentPoint().getX(), getY()+size);
+                marker.lineTo(marker.getCurrentPoint().getX() - size/3, marker.getCurrentPoint().getY());
+                marker.lineTo(marker.getCurrentPoint().getX(), marker.getCurrentPoint().getY()-size);
                 break;
-            }
+
+            case PORTAL_OUT:
+
+                canvas.setColor(Color.blue);
+                marker.moveTo(getX(), getY());
+                marker.lineTo(getX() + size/3, getY());
+                marker.lineTo(marker.getCurrentPoint().getX(), getY()+size);
+                marker.lineTo(marker.getCurrentPoint().getX() - size/3, marker.getCurrentPoint().getY());
+                marker.lineTo(marker.getCurrentPoint().getX(), marker.getCurrentPoint().getY()-size);
+                break;
         }
         canvas.draw(marker);
     }
@@ -73,5 +87,4 @@ public class Obj {
     public float getSize() {
         return size;
     }
-
 }

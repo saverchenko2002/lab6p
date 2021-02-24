@@ -3,7 +3,6 @@ package SaverchenkoGroup10Lab6VarC5;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 
@@ -23,11 +22,10 @@ public class Field extends JPanel {
     private final LinkedList<BouncingBall> balls = new LinkedList<>();
 
     private final Font hintFont;
-    private final float hintMove = 50;
     public int hintX;
     public int hintY;
 
-    ArrayList<Obj> obj = new ArrayList<>();
+    public LinkedList<Obj> obj = new LinkedList<>();
 
 
     public Field() {
@@ -56,65 +54,65 @@ public class Field extends JPanel {
         }
         canvas.setFont(hintFont);
 
+        float hintMove = 50;
+        canvas.setColor(Color.blue);
         switch (selected) {
-            case DIA: {
-                canvas.setColor(Color.blue);
-                canvas.drawString("press LMB to install destructor", hintX, (float) (hintY+hintMove));
+            case DIA:
+                canvas.drawString("press LMB to install destructor", hintX, hintY + hintMove);
                 break;
-            }
-            case CIA: {
-                canvas.setColor(Color.blue);
-                canvas.drawString("press LMB to install constructor", hintX, (float) (hintY+hintMove));
+            case CIA:
+                canvas.drawString("press LMB to install constructor", hintX, hintY + hintMove);
                 break;
-                }
-            case TP1IA: {
+            case TP1IA:
+                canvas.drawString("press LMB to install PORTAL-IN", hintX, hintY + hintMove);
+                break;
+            case TP2IA:
 
-                }
-            case TP2IA : {
+            case NONE:
 
-            }
-            case NONE: {
-
-            }
         }
 
-        if (obj.size()!=0) {
+        if (obj.size() != 0) {
             for (Obj obj1 : obj) {
                 obj1.paint(canvas);
             }
         }
 
-        if (balls.size()!=0 && obj.size()!=0) {
-            fu();
+        if (balls.size() != 0 && obj.size() != 0) {
+            touches();
 
         }
     }
-//TODO
-    public void fu () {
+
+    public void touches() {
         for (BouncingBall ball : balls) {
             for (Obj obj1 : obj) {
                 if (ball.intersect(obj1)) {
                     switch (obj1.getType()) {
-                        case DESTRUCTOR: {
-                                int saveIndex = ball.getNumber();
-                                for (int i = ball.getNumber() + 1; i < balls.size(); i++)
-                                    balls.get(i).setNumber(i - 1);
-                                balls.remove(saveIndex);
-                                return;
-                        }
-                        case CONSTRUCTOR: {
-
-                            BouncingBall ballCopy = new BouncingBall(this, ball);
-                            addBall(ballCopy);
+                        case DESTRUCTOR:
+                            ball.interrupt();
+                            int saveIndex = ball.getNumber();
+                            for (int i = ball.getNumber() + 1; i < balls.size(); i++)
+                                balls.get(i).setNumber(i - 1);
+                            balls.remove(saveIndex);
                             return;
-                        }
+
+                        case CONSTRUCTOR:
+                            if (ball.cloned == BouncingBall.Cloned.AVAILABLE) {
+                                ball.cloned = BouncingBall.Cloned.UNAVAILABLE;
+                                BouncingBall ballCopy = new BouncingBall(this, ball);
+                                addBall(ballCopy);
+                                return;
+                            }
                     }
-                }
+                } else if (cloneCheck(ball))
+                    ball.cloned = BouncingBall.Cloned.AVAILABLE;
             }
         }
     }
 
     public void addBall() {
+
         BouncingBall ball = new BouncingBall(this);
         ball.setNumber(balls.size());
         balls.add(ball);
@@ -144,21 +142,23 @@ public class Field extends JPanel {
             if (e.getButton() == 1) {
 
                 switch (selected) {
-                    case DIA: obj.add(new Obj(Obj.Type.DESTRUCTOR, e.getX(),e.getY())); break;
-                    case CIA: obj.add(new Obj(Obj.Type.CONSTRUCTOR,e.getX(),e.getY())); break;
-                    case TP1IA: {
-
-                    }
-                    case TP2IA: {
-
-                    }
-                    case NONE: {
-
-                    }
+                    case DIA:
+                        obj.add(new Obj(Obj.Type.DESTRUCTOR, e.getX(), e.getY()));
+                        break;
+                    case CIA:
+                        obj.add(new Obj(Obj.Type.CONSTRUCTOR, e.getX(), e.getY()));
+                        break;
+                    case TP1IA:
+                        setSelected(Selected.TP2IA);
+                        obj.add(new Obj(Obj.Type.PORTAL_IN, e.getX(), e.getY()));
                 }
-                selected = Selected.NONE;
-                setCursor(Cursor.getDefaultCursor());
             }
+            if (e.getButton() == 3) {
+                System.out.println("чмоня");
+                obj.add(new Obj(Obj.Type.PORTAL_OUT, e.getX(), e.getY()));
+            }
+            selected = Selected.NONE;
+            setCursor(Cursor.getDefaultCursor());
         }
     }
 
@@ -171,19 +171,34 @@ public class Field extends JPanel {
 
         @Override
         public void mouseMoved(MouseEvent e) {
-            if (selected!=Selected.NONE) {
-                hintX=e.getX();
-                hintY=e.getY();
+            if (selected != Selected.NONE) {
+                hintX = e.getX();
+                hintY = e.getY();
             }
         }
     }
 
-    public Selected getSelected () {
+    public void setSelected(Selected selected) {
+        this.selected = selected;
+    }
+
+    public Selected getSelected() {
         return selected;
     }
 
-    public void setSelected (Selected selected) {
-        this.selected=selected;
+    public LinkedList<Obj> getObj() {
+        return obj;
     }
 
+    public boolean cloneCheck(BouncingBall ball) {
+        boolean flag = false;
+        for (Obj obj1 : obj) {
+            if (obj1.getType() == Obj.Type.CONSTRUCTOR) {
+                if (!ball.intersect(obj1))
+                    flag = true;
+                else return false;
+            }
+        }
+        return flag;
+    }
 }
