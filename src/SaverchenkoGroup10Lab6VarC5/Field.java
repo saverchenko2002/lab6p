@@ -67,7 +67,8 @@ public class Field extends JPanel {
                 canvas.drawString("press LMB to install PORTAL-IN", hintX, hintY + hintMove);
                 break;
             case TP2IA:
-
+                canvas.drawString("press RMB to install PORTAL-OUT", hintX, hintY + hintMove);
+                break;
             case NONE:
 
         }
@@ -85,6 +86,7 @@ public class Field extends JPanel {
     }
 
     public void touches() {
+        int ID;
         for (BouncingBall ball : balls) {
             for (Obj obj1 : obj) {
                 if (ball.intersect(obj1)) {
@@ -104,10 +106,44 @@ public class Field extends JPanel {
                                 addBall(ballCopy);
                                 return;
                             }
+
+                        case PORTAL_IN:
+                            if (ball.portalled == BouncingBall.Portalled.UNAVAILABLE)
+                                return;
+                            ID = obj1.getId();
+                            for (Obj obj2 : obj) {
+                                if (obj2.getId() == ID + 1) {
+                                    ball.setX((obj2.getX() + obj2.getSize() / 3));
+                                    ball.setY((obj2.getY() + obj2.getSize() / 2));
+                                    ball.setPortalled(BouncingBall.Portalled.UNAVAILABLE);
+                                    return;
+                                }
+                            }
+
+
+                        case PORTAL_OUT: {
+                            if (ball.portalled == BouncingBall.Portalled.UNAVAILABLE)
+                                return;
+                            ID = obj1.getId();
+                            for (Obj obj2 : obj) {
+                                if (obj2.getId() == ID - 1) {
+                                    ball.setX((obj2.getX() + obj2.getSize() / 3));
+                                    ball.setY((obj2.getY() + obj2.getSize() / 2));
+                                    ball.setPortalled(BouncingBall.Portalled.UNAVAILABLE);
+                                    return;
+                                }
+                            }
+                        }
                     }
                 } else if (cloneCheck(ball))
                     ball.cloned = BouncingBall.Cloned.AVAILABLE;
             }
+        }
+    }
+
+    public void clearAll() {
+        for (BouncingBall balls1 : balls) {
+            balls1.interrupt();
         }
     }
 
@@ -140,7 +176,7 @@ public class Field extends JPanel {
     public class MouseHandler extends MouseAdapter {
         public void mousePressed(MouseEvent e) {
             if (e.getButton() == 1) {
-
+                System.out.println(obj.size());
                 switch (selected) {
                     case DIA:
                         obj.add(new Obj(Obj.Type.DESTRUCTOR, e.getX(), e.getY()));
@@ -149,13 +185,16 @@ public class Field extends JPanel {
                         obj.add(new Obj(Obj.Type.CONSTRUCTOR, e.getX(), e.getY()));
                         break;
                     case TP1IA:
-                        setSelected(Selected.TP2IA);
+
+                        selected = Selected.TP2IA;
                         obj.add(new Obj(Obj.Type.PORTAL_IN, e.getX(), e.getY()));
+                        Obj.dadPortal = obj.size() - 1;
+                        break;
+                    case TP2IA:
+                        selected = Selected.TP1IA;
+                        obj.add(new Obj(Obj.Type.PORTAL_IN, e.getX(), e.getY(), obj.get(Obj.dadPortal)));
+
                 }
-            }
-            if (e.getButton() == 3) {
-                System.out.println("чмоня");
-                obj.add(new Obj(Obj.Type.PORTAL_OUT, e.getX(), e.getY()));
             }
             selected = Selected.NONE;
             setCursor(Cursor.getDefaultCursor());
@@ -193,12 +232,16 @@ public class Field extends JPanel {
     public boolean cloneCheck(BouncingBall ball) {
         boolean flag = false;
         for (Obj obj1 : obj) {
-            if (obj1.getType() == Obj.Type.CONSTRUCTOR) {
+            if (obj1.getType() == Obj.Type.CONSTRUCTOR  ) {
                 if (!ball.intersect(obj1))
                     flag = true;
                 else return false;
             }
         }
         return flag;
+    }
+
+    public LinkedList<BouncingBall> getBalls() {
+        return balls;
     }
 }

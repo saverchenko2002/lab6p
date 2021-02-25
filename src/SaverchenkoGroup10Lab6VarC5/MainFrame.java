@@ -4,18 +4,19 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.LinkedList;
 
 public class MainFrame extends JFrame {
 
     private static final int WIDTH = 950;
     private static final int HEIGHT = 650;
 
-    private static final Field field = new Field();
+    private final Field field = new Field();
 
-    Cursor destructorCursor;
-    Cursor constructorCursor;
-    Cursor tpInCursor;
-    Cursor tpOutCursor;
+    private final Cursor destructorCursor;
+    private final Cursor constructorCursor;
+    private final Cursor tpInCursor;
+    private final Cursor tpOutCursor;
 
     public MainFrame() {
 
@@ -28,34 +29,45 @@ public class MainFrame extends JFrame {
 
         JMenuBar menuBar = new JMenuBar();
         setJMenuBar(menuBar);
+
         JMenu functionalMenu = menuBar.add(new JMenu("Add"));
-        JMenuItem addBall = functionalMenu.add(new JMenuItem("Ball"));
         JMenu furniture = new JMenu("Tools");
         functionalMenu.add(furniture);
         JMenu control = menuBar.add(new JMenu("Control"));
+
+        JMenuItem addBall = functionalMenu.add(new JMenuItem("Ball"));
         JMenuItem pauseMovement = control.add(new JMenuItem("Pause"));
         JMenuItem continueMovement = control.add(new JMenuItem("Resume"));
+
         continueMovement.setEnabled(false);
 
         JMenuItem addConstructor = furniture.add(new JMenuItem("Constructor"));
         JMenuItem addDestructor = furniture.add(new JMenuItem("Destructor"));
         JMenuItem addTeleport = furniture.add(new JMenuItem("Teleport"));
+        JMenuItem clearAllField = control.add(new JMenuItem("Clear all"));
 
+        addBall.setAccelerator(KeyStroke.getKeyStroke("A"));
+        pauseMovement.setAccelerator(KeyStroke.getKeyStroke("P"));
+        addConstructor.setAccelerator(KeyStroke.getKeyStroke("C"));
+        addDestructor.setAccelerator(KeyStroke.getKeyStroke("D"));
+        continueMovement.setAccelerator(KeyStroke.getKeyStroke("R"));
+        addTeleport.setAccelerator(KeyStroke.getKeyStroke("T"));
+        clearAllField.setAccelerator(KeyStroke.getKeyStroke("ctrl D"));
 
-        Image cursorD = kit.getImage("src/destructorCursor.PNG");
-        destructorCursor = kit.createCustomCursor(cursorD, new Point(0, 0), "cursor");
-        Image cursorC = kit.getImage("src/constructorCursor.PNG");
-        constructorCursor = kit.createCustomCursor(cursorC, new Point(0, 0), "cursor");
-        Image cursorTpIn = kit.getImage("src/tpInCursor.png");
-        tpInCursor = kit.createCustomCursor(cursorTpIn, new Point(0,0), "cursor");
+        Image imgDestructorCursor = kit.getImage("src/destructorCursor.PNG");
+        destructorCursor = kit.createCustomCursor(imgDestructorCursor, new Point(0, 0), "cursor");
+        Image imgConstructorCursor = kit.getImage("src/constructorCursor.PNG");
+        constructorCursor = kit.createCustomCursor(imgConstructorCursor, new Point(0, 0), "cursor");
+        Image imgTpInCursor = kit.createImage("src/tpInCursor.png");
+        tpInCursor = kit.createCustomCursor(imgTpInCursor, new Point(0, 0), "cursor");
+        Image imgTpOutCursor = kit.createImage("src/tpOutCursor.png");
+        tpOutCursor = kit.createCustomCursor(imgTpOutCursor, new Point(0, 0), "cursor");
 
         addBall.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 field.addBall();
             }
         });
-
-        addBall.setAccelerator(KeyStroke.getKeyStroke("A"));
 
         pauseMovement.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -65,8 +77,6 @@ public class MainFrame extends JFrame {
             }
         });
 
-        pauseMovement.setAccelerator(KeyStroke.getKeyStroke("P"));
-
         continueMovement.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 field.resume();
@@ -75,16 +85,12 @@ public class MainFrame extends JFrame {
             }
         });
 
-        continueMovement.setAccelerator(KeyStroke.getKeyStroke("R"));
-
         addConstructor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 field.setSelected(Field.Selected.CIA);
                 field.setCursor(constructorCursor);
             }
         });
-
-        addConstructor.setAccelerator(KeyStroke.getKeyStroke("C"));
 
         addDestructor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -93,15 +99,30 @@ public class MainFrame extends JFrame {
             }
         });
 
-        addDestructor.setAccelerator(KeyStroke.getKeyStroke("D"));
         addTeleport.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                field.setSelected(Field.Selected.TP1IA);
-                field.setCursor(tpInCursor);
+                if (Obj.nextId%2==0) {
+                    field.setSelected(Field.Selected.TP1IA);
+                    field.setCursor(tpInCursor);
+                }
+                else {
+                    field.setSelected(Field.Selected.TP2IA);
+                    field.setCursor(tpOutCursor);
+                }
             }
         });
 
-        addTeleport.setAccelerator(KeyStroke.getKeyStroke("T"));
+        clearAllField.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                LinkedList<Obj> obj = field.getObj();
+                obj.clear();
+                LinkedList<BouncingBall> balls = field.getBalls();
+                field.clearAll();
+                balls.clear();
+                field.setSelected(Field.Selected.NONE);
+                field.setCursor(Cursor.getDefaultCursor());
+            }
+        });
 
         getContentPane().add(field, BorderLayout.CENTER);
 
