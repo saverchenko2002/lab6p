@@ -22,7 +22,7 @@ public class Obj {
 
     private final float size;
     private static float dadSize;
-     private Color color;
+    private Color color;
     private final Type type;
     static int dadPortal;
 
@@ -31,10 +31,10 @@ public class Obj {
         this.x = x;
         this.y = y;
         size = (float) Math.random() * 100 + 150;
-        if (type==Type.PORTAL_IN) {
+        if (type == Type.PORTAL_IN) {
             color = new Color((float) random(), (float) random(), (float) random());
             id = nextId++;
-            dadSize=size;
+            dadSize = size;
         }
     }
 

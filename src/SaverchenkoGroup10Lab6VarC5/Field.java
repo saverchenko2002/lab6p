@@ -26,6 +26,7 @@ public class Field extends JPanel {
     public int hintY;
 
     public LinkedList<Obj> obj = new LinkedList<>();
+    public LinkedList<ObjectCoordinate> Objects = new LinkedList<>();
 
 
     public Field() {
@@ -70,16 +71,14 @@ public class Field extends JPanel {
                 canvas.drawString("press RMB to install PORTAL-OUT", hintX, hintY + hintMove);
                 break;
             case NONE:
-
         }
 
-        if (obj.size() != 0) {
-            for (Obj obj1 : obj) {
-                obj1.paint(canvas);
-            }
+        if (Objects.size()!=0) {
+          for (ObjectCoordinate object : Objects)
+              object.paint(canvas);
         }
 
-        if (balls.size() != 0 && obj.size() != 0) {
+        if (balls.size() != 0 && Objects.size() != 0) {
             touches();
 
         }
@@ -88,9 +87,129 @@ public class Field extends JPanel {
     public void touches() {
         int ID;
         for (BouncingBall ball : balls) {
-            for (Obj obj1 : obj) {
-                if (ball.intersect(obj1)) {
-                    switch (obj1.getType()) {
+            for (ObjectCoordinate obj : Objects) {
+                if (ball.intersect(obj) ) {
+                    ball.interrupt();
+                    int saveIndex = ball.getNumber();
+                    for (int i = ball.getNumber() + 1; i < balls.size(); i++)
+                        balls.get(i).setNumber(i - 1);
+                    balls.remove(saveIndex);
+                    return;
+                }
+            }
+        }
+    }
+
+    public void clearAll() {
+        for (BouncingBall balls1 : balls) {
+            balls1.interrupt();
+        }
+    }
+
+    public void addBall() {
+
+        BouncingBall ball = new BouncingBall(this);
+        ball.setNumber(balls.size());
+        balls.add(ball);
+    }
+
+    public void addBall(BouncingBall ball) {
+        ball.setNumber(balls.size());
+        balls.add(ball);
+    }
+
+    public synchronized void pause() {
+        paused = true;
+    }
+
+    public synchronized void resume() {
+        paused = false;
+        notifyAll();
+    }
+
+    public synchronized void canMove(BouncingBall ball) throws InterruptedException {
+        if (paused)
+            wait();
+    }
+
+    public class MouseHandler extends MouseAdapter {
+        public void mousePressed(MouseEvent e) {
+            if (e.getButton() == 1) {
+                System.out.println(Objects.size());
+                switch (selected) {
+
+                    case DIA:
+                        Objects.add(new Destructor(e.getX(),e.getY()));
+                        break;
+                    case CIA:
+                        obj.add(new Obj(Obj.Type.CONSTRUCTOR, e.getX(), e.getY()));
+                        break;
+                    case TP1IA:
+
+                        selected = Selected.TP2IA;
+                        obj.add(new Obj(Obj.Type.PORTAL_IN, e.getX(), e.getY()));
+                        Obj.dadPortal = obj.size() - 1;
+                        break;
+                    case TP2IA:
+                        selected = Selected.TP1IA;
+                        obj.add(new Obj(Obj.Type.PORTAL_IN, e.getX(), e.getY(), obj.get(Obj.dadPortal)));
+
+                }
+            }
+            selected = Selected.NONE;
+            setCursor(Cursor.getDefaultCursor());
+        }
+    }
+
+    public class MouseMotionHandler implements MouseMotionListener {
+
+        @Override
+        public void mouseDragged(MouseEvent e) {
+
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+            if (selected == Selected.NONE) {
+                hintX = e.getX();
+                hintY = e.getY();
+            }
+
+        }
+    }
+
+    public void setSelected(Selected selected) {
+        this.selected = selected;
+    }
+
+    public Selected getSelected() {
+        return selected;
+    }
+
+    public LinkedList<Obj> getObj() {
+        return obj;
+    }
+
+    /*public boolean cloneCheck(BouncingBall ball) {
+        boolean flag = false;
+        for (Obj obj1 : obj) {
+            if (obj1.getType() == Obj.Type.CONSTRUCTOR) {
+                if (!ball.intersect(obj1))
+                    flag = true;
+                else return false;
+            }
+        }
+        return flag;
+    }
+
+     */
+
+    public LinkedList<BouncingBall> getBalls() {
+        return balls;
+    }
+}
+
+/*switch (obj1.getType()) {
                         case DESTRUCTOR:
                             ball.interrupt();
                             int saveIndex = ball.getNumber();
@@ -135,113 +254,5 @@ public class Field extends JPanel {
                             }
                         }
                     }
-                } else if (cloneCheck(ball))
-                    ball.cloned = BouncingBall.Cloned.AVAILABLE;
-            }
-        }
-    }
 
-    public void clearAll() {
-        for (BouncingBall balls1 : balls) {
-            balls1.interrupt();
-        }
-    }
-
-    public void addBall() {
-
-        BouncingBall ball = new BouncingBall(this);
-        ball.setNumber(balls.size());
-        balls.add(ball);
-    }
-
-    public void addBall(BouncingBall ball) {
-        ball.setNumber(balls.size());
-        balls.add(ball);
-    }
-
-    public synchronized void pause() {
-        paused = true;
-    }
-
-    public synchronized void resume() {
-        paused = false;
-        notifyAll();
-    }
-
-    public synchronized void canMove(BouncingBall ball) throws InterruptedException {
-        if (paused)
-            wait();
-    }
-
-    public class MouseHandler extends MouseAdapter {
-        public void mousePressed(MouseEvent e) {
-            if (e.getButton() == 1) {
-                System.out.println(obj.size());
-                switch (selected) {
-                    case DIA:
-                        obj.add(new Obj(Obj.Type.DESTRUCTOR, e.getX(), e.getY()));
-                        break;
-                    case CIA:
-                        obj.add(new Obj(Obj.Type.CONSTRUCTOR, e.getX(), e.getY()));
-                        break;
-                    case TP1IA:
-
-                        selected = Selected.TP2IA;
-                        obj.add(new Obj(Obj.Type.PORTAL_IN, e.getX(), e.getY()));
-                        Obj.dadPortal = obj.size() - 1;
-                        break;
-                    case TP2IA:
-                        selected = Selected.TP1IA;
-                        obj.add(new Obj(Obj.Type.PORTAL_IN, e.getX(), e.getY(), obj.get(Obj.dadPortal)));
-
-                }
-            }
-            selected = Selected.NONE;
-            setCursor(Cursor.getDefaultCursor());
-        }
-    }
-
-    public class MouseMotionHandler implements MouseMotionListener {
-
-        @Override
-        public void mouseDragged(MouseEvent e) {
-
-        }
-
-        @Override
-        public void mouseMoved(MouseEvent e) {
-            if (selected != Selected.NONE) {
-                hintX = e.getX();
-                hintY = e.getY();
-            }
-        }
-    }
-
-    public void setSelected(Selected selected) {
-        this.selected = selected;
-    }
-
-    public Selected getSelected() {
-        return selected;
-    }
-
-    public LinkedList<Obj> getObj() {
-        return obj;
-    }
-
-    public boolean cloneCheck(BouncingBall ball) {
-        boolean flag = false;
-        for (Obj obj1 : obj) {
-            if (obj1.getType() == Obj.Type.CONSTRUCTOR  ) {
-                if (!ball.intersect(obj1))
-                    flag = true;
-                else return false;
-            }
-        }
-        return flag;
-    }
-
-    public LinkedList<BouncingBall> getBalls() {
-        return balls;
-    }
-}
+ */

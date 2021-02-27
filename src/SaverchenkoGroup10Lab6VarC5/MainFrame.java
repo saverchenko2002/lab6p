@@ -101,11 +101,10 @@ public class MainFrame extends JFrame {
 
         addTeleport.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (Obj.nextId%2==0) {
+                if (Obj.nextId % 2 == 0) {
                     field.setSelected(Field.Selected.TP1IA);
                     field.setCursor(tpInCursor);
-                }
-                else {
+                } else {
                     field.setSelected(Field.Selected.TP2IA);
                     field.setCursor(tpOutCursor);
                 }

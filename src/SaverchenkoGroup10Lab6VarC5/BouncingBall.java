@@ -104,24 +104,12 @@ public class BouncingBall extends Thread {
         canvas.fill(ball);
     }
 
-    public boolean intersect(Obj obj) {
-        switch (obj.getType()) {
-            case DESTRUCTOR:
-                return ((getX() - radius >= obj.getX() && getX() + radius <= obj.getX() + obj.getSize())
-                        && (getY() + radius <= obj.getY() + obj.getSize() && getY() - radius > obj.getY()));
-            case CONSTRUCTOR: {
-
-                return ((getX() - radius >= obj.getX() && getX() + radius <= obj.getX() + obj.getSize())
-                        && (getY() + radius <= obj.getY() + obj.getSize() && getY() - radius > obj.getY()));
-            }
-
-            case PORTAL_IN:
-            case PORTAL_OUT:
-                return ((getX() - radius >= obj.getX() && getX() + radius <= obj.getX() + obj.getSize() / 3)
-                        && (getY() + radius <= obj.getY() + obj.getSize() && getY() - radius > obj.getY()));
-            default:
-                return false;
+    public boolean intersect(ObjectCoordinate objects) {
+        if (objects.getClass().getSimpleName().equals("Destructor")) {
+            return ((getX() - radius >= objects.getX() && getX() + radius <= objects.getX() + objects.getSize())
+                    && (getY() + radius <= objects.getY() + objects.getSize() && getY() - radius > objects.getY()));
         }
+        else return false;
     }
 
     public double getX() {
