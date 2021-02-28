@@ -22,4 +22,3 @@ public class Constructor extends ObjectCoordinate {
         canvas.draw(marker);
     }
 }
-

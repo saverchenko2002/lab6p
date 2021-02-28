@@ -49,12 +49,8 @@ public class Ball extends ObjectCoordinate implements Runnable, ILimit {
         setColor(ball.getColor());
         radius = ball.radius;
         speed = ball.speed;
-        double angle = random() * 2 * PI;
-        while (3 * cos(angle) < 1) {
-            angle = random() * 2 * PI;
-        }
-        speedX = 3 * cos(angle);
-        speedY = 3 * cos(angle);
+        speedX = -ball.speedX;
+        speedY = -ball.speedY;
         setX(ball.getX());
         setY(ball.getY());
         thread = new Thread(this);
@@ -82,8 +78,7 @@ public class Ball extends ObjectCoordinate implements Runnable, ILimit {
     public void run() {
         while (true) {
             try {
-
-                field.canMove(this);
+                field.canMove();
                 if (getX() + speedX <= radius) {
                     speedX = -speedX;
                     setX(radius);
@@ -102,7 +97,7 @@ public class Ball extends ObjectCoordinate implements Runnable, ILimit {
                 }
                 Thread.sleep(16 - speed);
             } catch (InterruptedException ex) {
-                ex.printStackTrace();
+                break;
             }
         }
     }

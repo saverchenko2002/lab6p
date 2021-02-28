@@ -118,6 +118,7 @@ public class MainFrame extends JFrame {
                 field.getBalls().clear();
                 field.setSelected(Field.Selected.NONE);
                 field.setCursor(Cursor.getDefaultCursor());
+                Portal.nextId = 0;
             }
         });
 

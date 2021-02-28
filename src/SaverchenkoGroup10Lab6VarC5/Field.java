@@ -152,7 +152,7 @@ public class Field extends JPanel implements ISelected {
         notifyAll();
     }
 
-    public synchronized void canMove(Ball ball) throws InterruptedException {
+    public synchronized void canMove() throws InterruptedException {
         if (paused)
             wait();
     }
