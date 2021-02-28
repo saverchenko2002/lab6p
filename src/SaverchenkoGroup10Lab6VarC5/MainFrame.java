@@ -101,7 +101,7 @@ public class MainFrame extends JFrame {
 
         addTeleport.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (Obj.nextId % 2 == 0) {
+                if (Portal.nextId % 2 == 0) {
                     field.setSelected(Field.Selected.PORTAL_INPUT);
                     field.setCursor(tpInCursor);
                 } else {

@@ -5,24 +5,24 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.LinkedList;
 
-
-public class Field extends JPanel implements ISelected{
+public class Field extends JPanel implements ISelected {
 
     private Selected selected;
-
     private boolean paused;
-    private final LinkedList<Ball> balls = new LinkedList<>();
 
     private final Font hintFont;
-    public int hintX;
-    public int hintY;
+    public int hintXCoordinate;
+    public int hintYCoordinate;
 
-    public LinkedList<ObjectCoordinate> Objects = new LinkedList<>();
-
+    private final LinkedList<Ball> balls = new LinkedList<>();
+    public LinkedList<ObjectCoordinate> objects = new LinkedList<>();
+    public LinkedList<Portal> portals = new LinkedList<>();
 
     public Field() {
         selected = Selected.NONE;
         setBackground(Color.WHITE);
+        hintFont = new Font(Font.DIALOG, Font.BOLD, 14);
+
         Timer repaintTimer = new Timer(1, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 repaint();
@@ -32,53 +32,84 @@ public class Field extends JPanel implements ISelected{
 
         addMouseListener(new MouseHandler());
         addMouseMotionListener(new MouseMotionHandler());
-
-        hintFont = new Font(Font.SANS_SERIF, Font.PLAIN + Font.ITALIC, 14);
-
     }
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D canvas = (Graphics2D) g;
-        canvas.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         for (Ball ball : balls) {
             ball.paint(canvas);
         }
-        canvas.setFont(hintFont);
+        for (Portal portal : portals)
+            portal.paint(canvas);
+        for (ObjectCoordinate object : objects)
+            object.paint(canvas);
 
-        float hintMove = 50;
-        canvas.setColor(Color.blue);
+        canvas.setFont(hintFont);
+        canvas.setColor(Color.black);
         switch (selected) {
             case DESTRUCTOR_IS_SELECTED:
-                canvas.drawString("press LMB to install destructor", hintX, hintY + hintMove);
+                canvas.drawString("press LMB to install destructor", hintXCoordinate, hintYCoordinate + HINT_STEP);
                 break;
             case CONSTRUCTOR_IS_SELECTED:
-                canvas.drawString("press LMB to install constructor", hintX, hintY + hintMove);
+                canvas.drawString("press LMB to install constructor", hintXCoordinate, hintYCoordinate + HINT_STEP);
                 break;
             case PORTAL_INPUT:
-                canvas.drawString("press LMB to install PORTAL-IN", hintX, hintY + hintMove);
+                canvas.drawString("press LMB to install PORTAL-IN", hintXCoordinate, hintYCoordinate + HINT_STEP);
                 break;
             case PORTAL_OUTPUT:
-                canvas.drawString("press RMB to install PORTAL-OUT", hintX, hintY + hintMove);
+                canvas.drawString("press RMB to install PORTAL-OUT", hintXCoordinate, hintYCoordinate + HINT_STEP);
                 break;
             case NONE:
+                break;
         }
 
-        if (Objects.size() != 0) {
-            for (ObjectCoordinate object : Objects)
-                object.paint(canvas);
-        }
-
-        if (balls.size() != 0 && Objects.size() != 0) {
-            touches();
-
+        if (balls.size() != 0 && (objects.size() != 0 || portals.size() != 0)) {
+            intersectResult();
         }
     }
 
-    public void touches() {
-        int ID;
+    public boolean checkCloneAvailable(Ball ball) {
+        boolean flag = false;
+        for (ObjectCoordinate object : objects) {
+            if (object.getClass().getSimpleName().equals("Constructor")) {
+                if (!ball.intersect(object))
+                    flag = true;
+                else return false;
+            }
+        }
+        return flag;
+    }
+
+    public boolean checkPortalAvailable(Ball ball) {
+        boolean flag = false;
+        for (Portal portal : portals) {
+            if (!ball.intersect(portal))
+                flag = true;
+            else return false;
+        }
+        return flag;
+    }
+
+    public void intersectResult() {
         for (Ball ball : balls) {
-            for (ObjectCoordinate obj : Objects) {
+            for (Portal portal : portals) {
+                if (ball.intersect(portal) && ball.portalled == Ball.Portalled.AVAILABLE) {
+                    System.out.println("даун");
+                    ball.portalled = Ball.Portalled.UNAVAILABLE;
+                    if (portal.getId() % 2 == 0) {
+                        if (portals.size() == portal.getId() + 1)
+                            return;
+                        ball.setX((portals.get(portal.getId() + 1)).getX());
+                        ball.setY((portals.get(portal.getId() + 1)).getY());
+                    } else if (portal.getId() % 2 == 1) {
+                        ball.setX((portals.get(portal.getId() - 1)).getX());
+                        ball.setY((portals.get(portal.getId() - 1)).getY());
+                    }
+                } else if (checkPortalAvailable(ball))
+                    ball.portalled = Ball.Portalled.AVAILABLE;
+            }
+            for (ObjectCoordinate obj : objects) {
                 if (ball.intersect(obj) && obj.getClass().getSimpleName().equals("Destructor")) {
                     ball.getThread().interrupt();
                     int saveIndex = ball.getId();
@@ -86,28 +117,18 @@ public class Field extends JPanel implements ISelected{
                         balls.get(i).setId(i - 1);
                     balls.remove(saveIndex);
                     return;
-                } else if (ball.intersect(obj) && obj.getClass().getSimpleName().equals("Constructor")) {
-                    if (ball.cloned == Ball.Cloned.AVAILABLE) {
-                        ball.cloned = Ball.Cloned.UNAVAILABLE;
-                        Ball ballCopy = new Ball(this, ball);
-                        addBall(ballCopy);
-                        return;
-                    }
-                }
+                } else if (ball.intersect(obj) && obj.getClass().getSimpleName().equals("Constructor") && ball.cloned == ILimit.Cloned.AVAILABLE) {
+                    ball.cloned = Ball.Cloned.UNAVAILABLE;
+                    Ball ballCopy = new Ball(this, ball);
+                    addBall(ballCopy);
+                    return;
+                } else if (checkCloneAvailable(ball))
+                    ball.cloned = ILimit.Cloned.AVAILABLE;
             }
         }
     }
-   /* public void clearAll() {
-        for (BouncingBall balls1 : balls) {
-            balls1.interrupt();
-        }
-    }
-
-    */
-
 
     public void addBall() {
-
         Ball ball = new Ball(this);
         ball.setId(balls.size());
         balls.add(ball);
@@ -135,24 +156,24 @@ public class Field extends JPanel implements ISelected{
     public class MouseHandler extends MouseAdapter {
         public void mousePressed(MouseEvent e) {
             if (e.getButton() == 1) {
-                System.out.println(Objects.size());
+                System.out.println(objects.size());
                 switch (selected) {
 
                     case DESTRUCTOR_IS_SELECTED:
-                        Objects.add(new Destructor(e.getX(), e.getY()));
+                        objects.add(new Destructor(e.getX(), e.getY()));
                         break;
                     case CONSTRUCTOR_IS_SELECTED:
-                        Objects.add(new Constructor(e.getX(), e.getY()));
+                        objects.add(new Constructor(e.getX(), e.getY()));
                         break;
                     case PORTAL_INPUT:
-
                         selected = Selected.PORTAL_OUTPUT;
-                        //obj.add(new Obj(Obj.Type.PORTAL_IN, e.getX(), e.getY()));
-                        //Obj.dadPortal = obj.size() - 1;
+                        portals.add(new Portal(e.getX(), e.getY()));
                         break;
                     case PORTAL_OUTPUT:
                         selected = Selected.PORTAL_INPUT;
-                        //obj.add(new Obj(Obj.Type.PORTAL_IN, e.getX(), e.getY(), obj.get(Obj.dadPortal)));
+                        portals.add(new Portal(e.getX(), e.getY(), portals.get(Portal.nextId - 1)));
+                    case NONE:
+                        break;
 
                 }
             }
@@ -163,16 +184,14 @@ public class Field extends JPanel implements ISelected{
 
     public class MouseMotionHandler implements MouseMotionListener {
 
-        @Override
         public void mouseDragged(MouseEvent e) {
 
         }
 
-        @Override
         public void mouseMoved(MouseEvent e) {
-            if (selected == Selected.NONE) {
-                hintX = e.getX();
-                hintY = e.getY();
+            if (selected != Selected.NONE) {
+                hintXCoordinate = e.getX();
+                hintYCoordinate = e.getY();
             }
 
         }
@@ -185,74 +204,4 @@ public class Field extends JPanel implements ISelected{
     public Selected getSelected() {
         return selected;
     }
-
-    //public LinkedList<Obj> getObj() {
-    //return obj;
-    // }
-
-    /*public boolean cloneCheck(BouncingBall ball) {
-        boolean flag = false;
-        for (Obj obj1 : obj) {
-            if (obj1.getType() == Obj.Type.CONSTRUCTOR) {
-                if (!ball.intersect(obj1))
-                    flag = true;
-                else return false;
-            }
-        }
-        return flag;
-    }
-
-     */
-
-    // public LinkedList<BouncingBall> getBalls() {
-    //return balls;
-    //}
 }
-
-/*switch (obj1.getType()) {
-                        case DESTRUCTOR:
-                            ball.interrupt();
-                            int saveIndex = ball.getNumber();
-                            for (int i = ball.getNumber() + 1; i < balls.size(); i++)
-                                balls.get(i).setNumber(i - 1);
-                            balls.remove(saveIndex);
-                            return;
-
-                        case CONSTRUCTOR:
-                            if (ball.cloned == BouncingBall.Cloned.AVAILABLE) {
-                                ball.cloned = BouncingBall.Cloned.UNAVAILABLE;
-                                BouncingBall ballCopy = new BouncingBall(this, ball);
-                                addBall(ballCopy);
-                                return;
-                            }
-
-                        case PORTAL_IN:
-                            if (ball.portalled == BouncingBall.Portalled.UNAVAILABLE)
-                                return;
-                            ID = obj1.getId();
-                            for (Obj obj2 : obj) {
-                                if (obj2.getId() == ID + 1) {
-                                    ball.setX((obj2.getX() + obj2.getSize() / 3));
-                                    ball.setY((obj2.getY() + obj2.getSize() / 2));
-                                    ball.setPortalled(BouncingBall.Portalled.UNAVAILABLE);
-                                    return;
-                                }
-                            }
-
-
-                        case PORTAL_OUT: {
-                            if (ball.portalled == BouncingBall.Portalled.UNAVAILABLE)
-                                return;
-                            ID = obj1.getId();
-                            for (Obj obj2 : obj) {
-                                if (obj2.getId() == ID - 1) {
-                                    ball.setX((obj2.getX() + obj2.getSize() / 3));
-                                    ball.setY((obj2.getY() + obj2.getSize() / 2));
-                                    ball.setPortalled(BouncingBall.Portalled.UNAVAILABLE);
-                                    return;
-                                }
-                            }
-                        }
-                    }
-
- */
