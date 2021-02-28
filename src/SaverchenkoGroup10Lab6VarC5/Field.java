@@ -6,26 +6,17 @@ import java.awt.event.*;
 import java.util.LinkedList;
 
 
-public class Field extends JPanel {
-
-    public enum Selected {
-        NONE,
-        DIA,
-        CIA,
-        TP1IA,
-        TP2IA
-    }
+public class Field extends JPanel implements ISelected{
 
     private Selected selected;
 
     private boolean paused;
-    private final LinkedList<BouncingBall> balls = new LinkedList<>();
+    private final LinkedList<Ball> balls = new LinkedList<>();
 
     private final Font hintFont;
     public int hintX;
     public int hintY;
 
-    public LinkedList<Obj> obj = new LinkedList<>();
     public LinkedList<ObjectCoordinate> Objects = new LinkedList<>();
 
 
@@ -50,7 +41,7 @@ public class Field extends JPanel {
         super.paintComponent(g);
         Graphics2D canvas = (Graphics2D) g;
         canvas.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        for (BouncingBall ball : balls) {
+        for (Ball ball : balls) {
             ball.paint(canvas);
         }
         canvas.setFont(hintFont);
@@ -58,24 +49,24 @@ public class Field extends JPanel {
         float hintMove = 50;
         canvas.setColor(Color.blue);
         switch (selected) {
-            case DIA:
+            case DESTRUCTOR_IS_SELECTED:
                 canvas.drawString("press LMB to install destructor", hintX, hintY + hintMove);
                 break;
-            case CIA:
+            case CONSTRUCTOR_IS_SELECTED:
                 canvas.drawString("press LMB to install constructor", hintX, hintY + hintMove);
                 break;
-            case TP1IA:
+            case PORTAL_INPUT:
                 canvas.drawString("press LMB to install PORTAL-IN", hintX, hintY + hintMove);
                 break;
-            case TP2IA:
+            case PORTAL_OUTPUT:
                 canvas.drawString("press RMB to install PORTAL-OUT", hintX, hintY + hintMove);
                 break;
             case NONE:
         }
 
-        if (Objects.size()!=0) {
-          for (ObjectCoordinate object : Objects)
-              object.paint(canvas);
+        if (Objects.size() != 0) {
+            for (ObjectCoordinate object : Objects)
+                object.paint(canvas);
         }
 
         if (balls.size() != 0 && Objects.size() != 0) {
@@ -86,35 +77,44 @@ public class Field extends JPanel {
 
     public void touches() {
         int ID;
-        for (BouncingBall ball : balls) {
+        for (Ball ball : balls) {
             for (ObjectCoordinate obj : Objects) {
-                if (ball.intersect(obj) ) {
-                    ball.interrupt();
-                    int saveIndex = ball.getNumber();
-                    for (int i = ball.getNumber() + 1; i < balls.size(); i++)
-                        balls.get(i).setNumber(i - 1);
+                if (ball.intersect(obj) && obj.getClass().getSimpleName().equals("Destructor")) {
+                    ball.getThread().interrupt();
+                    int saveIndex = ball.getId();
+                    for (int i = ball.getId() + 1; i < balls.size(); i++)
+                        balls.get(i).setId(i - 1);
                     balls.remove(saveIndex);
                     return;
+                } else if (ball.intersect(obj) && obj.getClass().getSimpleName().equals("Constructor")) {
+                    if (ball.cloned == Ball.Cloned.AVAILABLE) {
+                        ball.cloned = Ball.Cloned.UNAVAILABLE;
+                        Ball ballCopy = new Ball(this, ball);
+                        addBall(ballCopy);
+                        return;
+                    }
                 }
             }
         }
     }
-
-    public void clearAll() {
+   /* public void clearAll() {
         for (BouncingBall balls1 : balls) {
             balls1.interrupt();
         }
     }
 
+    */
+
+
     public void addBall() {
 
-        BouncingBall ball = new BouncingBall(this);
-        ball.setNumber(balls.size());
+        Ball ball = new Ball(this);
+        ball.setId(balls.size());
         balls.add(ball);
     }
 
-    public void addBall(BouncingBall ball) {
-        ball.setNumber(balls.size());
+    public void addBall(Ball ball) {
+        ball.setId(balls.size());
         balls.add(ball);
     }
 
@@ -127,7 +127,7 @@ public class Field extends JPanel {
         notifyAll();
     }
 
-    public synchronized void canMove(BouncingBall ball) throws InterruptedException {
+    public synchronized void canMove(Ball ball) throws InterruptedException {
         if (paused)
             wait();
     }
@@ -138,21 +138,21 @@ public class Field extends JPanel {
                 System.out.println(Objects.size());
                 switch (selected) {
 
-                    case DIA:
-                        Objects.add(new Destructor(e.getX(),e.getY()));
+                    case DESTRUCTOR_IS_SELECTED:
+                        Objects.add(new Destructor(e.getX(), e.getY()));
                         break;
-                    case CIA:
-                        obj.add(new Obj(Obj.Type.CONSTRUCTOR, e.getX(), e.getY()));
+                    case CONSTRUCTOR_IS_SELECTED:
+                        Objects.add(new Constructor(e.getX(), e.getY()));
                         break;
-                    case TP1IA:
+                    case PORTAL_INPUT:
 
-                        selected = Selected.TP2IA;
-                        obj.add(new Obj(Obj.Type.PORTAL_IN, e.getX(), e.getY()));
-                        Obj.dadPortal = obj.size() - 1;
+                        selected = Selected.PORTAL_OUTPUT;
+                        //obj.add(new Obj(Obj.Type.PORTAL_IN, e.getX(), e.getY()));
+                        //Obj.dadPortal = obj.size() - 1;
                         break;
-                    case TP2IA:
-                        selected = Selected.TP1IA;
-                        obj.add(new Obj(Obj.Type.PORTAL_IN, e.getX(), e.getY(), obj.get(Obj.dadPortal)));
+                    case PORTAL_OUTPUT:
+                        selected = Selected.PORTAL_INPUT;
+                        //obj.add(new Obj(Obj.Type.PORTAL_IN, e.getX(), e.getY(), obj.get(Obj.dadPortal)));
 
                 }
             }
@@ -186,9 +186,9 @@ public class Field extends JPanel {
         return selected;
     }
 
-    public LinkedList<Obj> getObj() {
-        return obj;
-    }
+    //public LinkedList<Obj> getObj() {
+    //return obj;
+    // }
 
     /*public boolean cloneCheck(BouncingBall ball) {
         boolean flag = false;
@@ -204,9 +204,9 @@ public class Field extends JPanel {
 
      */
 
-    public LinkedList<BouncingBall> getBalls() {
-        return balls;
-    }
+    // public LinkedList<BouncingBall> getBalls() {
+    //return balls;
+    //}
 }
 
 /*switch (obj1.getType()) {

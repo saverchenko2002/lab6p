@@ -87,14 +87,14 @@ public class MainFrame extends JFrame {
 
         addConstructor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                field.setSelected(Field.Selected.CIA);
+                field.setSelected(Field.Selected.CONSTRUCTOR_IS_SELECTED);
                 field.setCursor(constructorCursor);
             }
         });
 
         addDestructor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                field.setSelected(Field.Selected.DIA);
+                field.setSelected(Field.Selected.DESTRUCTOR_IS_SELECTED);
                 field.setCursor(destructorCursor);
             }
         });
@@ -102,10 +102,10 @@ public class MainFrame extends JFrame {
         addTeleport.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (Obj.nextId % 2 == 0) {
-                    field.setSelected(Field.Selected.TP1IA);
+                    field.setSelected(Field.Selected.PORTAL_INPUT);
                     field.setCursor(tpInCursor);
                 } else {
-                    field.setSelected(Field.Selected.TP2IA);
+                    field.setSelected(Field.Selected.PORTAL_OUTPUT);
                     field.setCursor(tpOutCursor);
                 }
             }
@@ -113,13 +113,13 @@ public class MainFrame extends JFrame {
 
         clearAllField.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                LinkedList<Obj> obj = field.getObj();
+               /* LinkedList<Obj> obj = field.getObj();
                 obj.clear();
                 LinkedList<BouncingBall> balls = field.getBalls();
                 field.clearAll();
                 balls.clear();
                 field.setSelected(Field.Selected.NONE);
-                field.setCursor(Cursor.getDefaultCursor());
+                field.setCursor(Cursor.getDefaultCursor());*/
             }
         });
 

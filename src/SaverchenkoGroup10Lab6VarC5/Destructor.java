@@ -7,19 +7,20 @@ public class Destructor extends ObjectCoordinate {
 
     public Destructor(int x, int y) {
         super(x, y);
-        setSize((int)(Math.random()*RANDOM_VARIETY+MIN_OBJECT_SIZE));
     }
 
     public void paint(Graphics2D canvas) {
         canvas.setColor(Color.red);
         GeneralPath marker = new GeneralPath();
-        Point centerPoint = new Point((int)(getX()+getSize()/2.0),(int)(getY()+getSize()/2.0));
-        marker.moveTo(getX(),getY());
-        marker.lineTo(getX()+getSize(),getY()+getSize());
+        Point centerPoint = new Point(getX(),getY());
         marker.moveTo(centerPoint.getX(),centerPoint.getY());
-        marker.lineTo(getX()+getSize(),getY());
+        marker.lineTo(centerPoint.getX()-getSize()/2.0,centerPoint.getY()-getSize()/2.0);
         marker.moveTo(centerPoint.getX(),centerPoint.getY());
-        marker.lineTo(getX(),getY()+getSize());
+        marker.lineTo(centerPoint.getX()+getSize()/2.0,centerPoint.getY()+getSize()/2.0);
+        marker.moveTo(centerPoint.getX(),centerPoint.getY());
+        marker.lineTo(centerPoint.getX()+getSize()/2.0,centerPoint.getY()-getSize()/2.0);
+        marker.moveTo(centerPoint.getX(),centerPoint.getY());
+        marker.lineTo(centerPoint.getX()-getSize()/2.0,centerPoint.getY()+getSize()/2.0);
         marker.closePath();
         canvas.draw(marker);
     }

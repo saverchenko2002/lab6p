@@ -1,16 +1,19 @@
 package SaverchenkoGroup10Lab6VarC5;
 
-abstract public class ObjectCoordinate implements Paint {
-    static final int MIN_OBJECT_SIZE = 100;
-    static final int RANDOM_VARIETY = 100;
+abstract public class ObjectCoordinate implements IPaint {
 
     private int x;
     private int y;
     private int size;
 
+    public ObjectCoordinate() {
+
+    }
+
     public ObjectCoordinate(final int x, final int y) {
         this.x = x;
         this.y = y;
+        setSize((int)(Math.random()*RANDOM_VARIETY+MIN_OBJECT_SIZE));
     }
 
     public int getX() {
