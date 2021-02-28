@@ -15,8 +15,8 @@ public class Field extends JPanel implements ISelected {
     public int hintYCoordinate;
 
     private final LinkedList<Ball> balls = new LinkedList<>();
-    public LinkedList<ObjectCoordinate> objects = new LinkedList<>();
-    public LinkedList<Portal> portals = new LinkedList<>();
+    private final LinkedList<ObjectCoordinate> objects = new LinkedList<>();
+    private final LinkedList<Portal> portals = new LinkedList<>();
 
     public Field() {
         selected = Selected.NONE;
@@ -95,7 +95,6 @@ public class Field extends JPanel implements ISelected {
         for (Ball ball : balls) {
             for (Portal portal : portals) {
                 if (ball.intersect(portal) && ball.portalled == Ball.Portalled.AVAILABLE) {
-                    System.out.println("даун");
                     ball.portalled = Ball.Portalled.UNAVAILABLE;
                     if (portal.getId() % 2 == 0) {
                         if (portals.size() == portal.getId() + 1)
@@ -119,7 +118,7 @@ public class Field extends JPanel implements ISelected {
                     return;
                 } else if (ball.intersect(obj) && obj.getClass().getSimpleName().equals("Constructor") && ball.cloned == ILimit.Cloned.AVAILABLE) {
                     ball.cloned = Ball.Cloned.UNAVAILABLE;
-                    Ball ballCopy = new Ball(this, ball);
+                    Ball ballCopy = new Ball(ball);
                     addBall(ballCopy);
                     return;
                 } else if (checkCloneAvailable(ball))
@@ -139,6 +138,11 @@ public class Field extends JPanel implements ISelected {
         balls.add(ball);
     }
 
+    public void killAllBalls() {
+        for (Ball ball : balls)
+            ball.getThread().interrupt();
+    }
+
     public synchronized void pause() {
         paused = true;
     }
@@ -156,7 +160,6 @@ public class Field extends JPanel implements ISelected {
     public class MouseHandler extends MouseAdapter {
         public void mousePressed(MouseEvent e) {
             if (e.getButton() == 1) {
-                System.out.println(objects.size());
                 switch (selected) {
 
                     case DESTRUCTOR_IS_SELECTED:
@@ -203,5 +206,17 @@ public class Field extends JPanel implements ISelected {
 
     public Selected getSelected() {
         return selected;
+    }
+
+    public LinkedList<Ball> getBalls() {
+        return balls;
+    }
+
+    public LinkedList<ObjectCoordinate> getObjects() {
+        return objects;
+    }
+
+    public LinkedList<Portal> getPortals() {
+        return portals;
     }
 }

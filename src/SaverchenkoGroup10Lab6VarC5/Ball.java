@@ -42,7 +42,7 @@ public class Ball extends ObjectCoordinate implements Runnable, ILimit {
         thread.start();
     }
 
-    public Ball(Field field, Ball ball) {
+    public Ball(Ball ball) {
         cloned = Cloned.UNAVAILABLE;
         portalled = Portalled.AVAILABLE;
         this.field = ball.field;

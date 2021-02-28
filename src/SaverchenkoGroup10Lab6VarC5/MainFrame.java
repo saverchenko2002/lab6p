@@ -4,7 +4,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.LinkedList;
 
 public class MainFrame extends JFrame {
 
@@ -113,13 +112,12 @@ public class MainFrame extends JFrame {
 
         clearAllField.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-               /* LinkedList<Obj> obj = field.getObj();
-                obj.clear();
-                LinkedList<BouncingBall> balls = field.getBalls();
-                field.clearAll();
-                balls.clear();
+                field.getPortals().clear();
+                field.getObjects().clear();
+                field.killAllBalls();
+                field.getBalls().clear();
                 field.setSelected(Field.Selected.NONE);
-                field.setCursor(Cursor.getDefaultCursor());*/
+                field.setCursor(Cursor.getDefaultCursor());
             }
         });
 
